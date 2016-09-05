@@ -1,106 +1,119 @@
 <!DOCTYPE html>
 <html>
-<head>
-<style>
-div#memory_board{
-	background:#CCC;
-	border:#999 1px solid;
-	width:800px;
-	height:540px;
-	padding:24px;
-	margin:0px auto;
-}
-div#memory_board > div{
-	background: url(chat.png) no-repeat;
-	border:#000 1px solid;
-	width:71px;
-	height:71px;
-	float:left;
-	margin:10px;
-	padding:20px;
-	text-align: center;
-	font-size: 80px;
-}
-</style>
-<script>
-var memory_array = ['A','A','B','B','C','C','D','D','E','E','F','F','G','G','H','H','I','I','J','J','K','K','L','L'];
-var memory_values = [];
-var memory_tile_ids = [];
-var tiles_flipped = 0;
-Array.prototype.memory_tile_shuffle = function(){
-    var i = this.length, j, temp;
-    while(--i > 0){
-        j = Math.floor(Math.random() * (i+1));
-        temp = this[j];
-        this[j] = this[i];
-        this[i] = temp;
-    }
-}
-function newBoard(){
-	tiles_flipped = 0;
-	var output = '';
-    memory_array.memory_tile_shuffle();
-	for(var i = 0; i < memory_array.length; i++){
-		output += '<div id="tile_'+i+'" onclick="memoryFlipTile(this,\''+memory_array[i]+'\')"></div>';
+	<head>
+	<meta charset="utf-8" />
+	<title>Memory Game Javascript (By Lucas HOULES)</title>
+	<style>
+	div#memory_board{
+		background:#CCC;
+		border:#999 1px solid;
+		width:800px;
+		height:540px;
+		padding-bottom:80px;
+		margin:0px auto;
 	}
-	document.getElementById('memory_board').innerHTML = output;
-}
+	div#memory_board > div{
+		background: url(images/chat.png) no-repeat;
+		border:#000 1px solid;
+		width:71px;
+		height:71px;
+		float:left;
+		margin:10px;
+		padding:20px;
+		text-align: center;
+		font-size: 80px;
 
-function memoryFlipTile(tile, val){
-	if(tile.innerHTML == "" && memory_values.length < 2){
-		tile.style.background = "#FFF";
-		tile.innerHTML = val;
-		if(memory_values.length == 0)
-		{
-			memory_values.push(val);
-			memory_tile_ids.push(tile.id);
-		}else if(memory_values.length == 1){
-			memory_values.push(val);
-			memory_tile_ids.push(tile.id);
-			if(memory_values[0] == memory_values[1]){
-				tiles_flipped +=2;
-
-				memory_values = [];
-				memory_tile_ids = [];
-
-				if(tiles_flipped == memory_array.length){
-					alert("Vous avez gagner.... géneration nouvelle partie ?");
-					if(confirm("Vous voulez rejouer ?")){
-
-
-						document.getElementById('memory_board').innerHTML = "";
-						newBoard();
-					}
-
-
-				}
-
-			}else{
-				function flip2Back(){
-					var tile_1 = document.getElementById(memory_tile_ids[0]);
-					var tile_2 = document.getElementById(memory_tile_ids[1]);
-					tile_1.style.background= ' url(chat.png) no-repeat';
-					tile_1.innerHTML = "";
-				    tile_2.style.background=  'url(chat.png) no-repeat';
-					tile_2.innerHTML = "";
-
-					memory_values = [];
-					memory_tile_ids = [];
-
-					
-
-				}
-				setTimeout(flip2Back, 800);
-			}
-
+	}
+	.nbCoups{
+		position: relative;
+		left: 47%;
+		top: -50px;
+	
+	}
+	</style>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.2.6/jquery.js"></script>
+	<script>
+	var memory_array = ['A','A','B','B','C','C','D','D','E','E','F','F','G','G','H','H','I','I','J','J','K','K','L','L'];
+	var memory_values = []; // Tableau retenant en mémoire les Lettres dont l'utilisateur a cliquer (maximum de sa taille = 2)
+	var memory_tile_ids = []; // ID des cases
+	var tiles_flipped = 0; // Nombre de cases retourner
+	var nb_coups = 0;
+	Array.prototype.memory_tile_shuffle = function(){
+	    var i = this.length, j, temp;
+	    while(--i > 0){
+	        j = Math.floor(Math.random() * (i+1)); // génération nombre aléatoire
+	        temp = this[j];
+	        this[j] = this[i];
+	        this[i] = temp;
+	    }
+	}
+	/// function qui permet de générer toute les cases du memory game (autant de div sont créer que la taille du tableau).
+	function newBoard(){
+		tiles_flipped = 0;
+		var output = '';
+	    memory_array.memory_tile_shuffle(); // On mélange les cases avant de les afficher.
+		for(var i = 0; i < memory_array.length; i++){
+			output += '<div id="tile_'+i+'" onclick="memoryFlipTile(this,\''+memory_array[i]+'\')"></div>';
 		}
-
+		document.getElementById('memory_board').innerHTML = output;
 	}
-}
-</script>
-</head>
-<body>
-<div id="memory_board"></div>
-<script>newBoard();</script>
-</body>
+	// function appeller si l'utilisateur a cliquer sur une case qui prend en paramètre l'id de la case et sa valeur (la lettre).
+	function memoryFlipTile(tile, val){
+		
+		if(tile.innerHTML == "" && memory_values.length < 2){
+			tile.style.background = "#FFF"; // On passe le fond blanc pour supprimer l'image
+			tile.innerHTML = val; // On ajoute la lettre a la case.
+			if(memory_values.length == 0) // Si aucune case a était retourner
+			{ // On ajoute dans le tableau la case qui a était cliquer ainsi que son id dans un autre tableau
+				memory_values.push(val);
+				memory_tile_ids.push(tile.id);
+			}else if(memory_values.length == 1){ // Si au moins 1 case a était retourner.
+				//on effectue le méme traitement.
+				memory_values.push(val);
+				memory_tile_ids.push(tile.id);
+				if(memory_values[0] == memory_values[1]){
+					tiles_flipped +=2; // 2 cases sont retourner car on a trouver 2 lettres identiques.
+
+					memory_values = []; // On remet a zéro nos 2 tableaux
+					memory_tile_ids = [];
+					// Si autant de cases ont était retourner que de cases existante le joueur gagne.
+					if(tiles_flipped == memory_array.length){
+						alert("Vous avez gagner.... ");
+						if(confirm("Vous voulez rejouer ?")){
+
+							document.getElementById('memory_board').innerHTML = "";
+							newBoard();
+						}
+
+					}
+				 // Si les 2 cases sont pas identiques on les retourne.
+				} else{
+					function flip2Back(){
+						// On récupere les 2 cases qui ont était retourner on re affiche l'image et on vide leur contenu.
+						var tile_1 = document.getElementById(memory_tile_ids[0]);
+						var tile_2 = document.getElementById(memory_tile_ids[1]);
+						tile_1.style.background= ' url(images/chat.png) no-repeat';
+						tile_1.innerHTML = "";
+					    tile_2.style.background=  'url(images/chat.png) no-repeat';
+						tile_2.innerHTML = "";
+
+						memory_values = [];
+						memory_tile_ids = [];
+
+						
+					}
+					setTimeout(flip2Back, 800); // Appeller en boucle toute les 800ms.
+				}
+			}
+		}
+	}
+	</script>
+	</head>
+	<body>
+	<div class="container">
+	<div id="memory_board"></div>
+	<p class="nbCoups">Nombre de coups:</p>
+	</div>
+	<script>newBoard();</script> <!-- Appel de la fonction newBoard dés le chargement de la page pour générer les cases -->
+	</body> 
 </html>
